@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* RideWise Design System - Bike Sharing Analytics Dashboard */
+
+@layer base {
+  :root {
+    /* Deep Navy Blue - Primary */
+    --primary: 210 50% 25%;
+    --primary-foreground: 210 40% 98%;
+
+    /* Light Gray - Background */
+    --background: 210 20% 98%;
+    --foreground: 210 50% 15%;
+
+    /* Card styling */
+    --card: 0 0% 100%;
+    --card-foreground: 210 50% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 50% 15%;
+
+    /* Muted Teal - Accent */
+    --accent: 174 40% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Secondary */
+    --secondary: 210 20% 94%;
+    --secondary-foreground: 210 50% 20%;
+
+    /* Muted */
+    --muted: 210 15% 92%;
+    --muted-foreground: 210 20% 45%;
+
+    /* Destructive */
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders & Inputs */
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 210 50% 25%;
+
+    --radius: 0.625rem;
+
+    /* Chart colors */
+    --chart-1: 210 50% 35%;
+    --chart-2: 174 40% 45%;
+    --chart-3: 45 70% 55%;
+    --chart-4: 210 30% 55%;
+    --chart-5: 0 60% 55%;
+
+    /* Status colors */
+    --success: 142 50% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 45 90% 50%;
+    --warning-foreground: 45 90% 15%;
+
+    /* Sidebar */
+    --sidebar-background: 210 50% 20%;
+    --sidebar-foreground: 210 20% 95%;
+    --sidebar-primary: 174 40% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 50% 30%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 210 40% 30%;
+    --sidebar-ring: 174 40% 50%;
+  }
+
+  .dark {
+    --primary: 210 40% 70%;
+    --primary-foreground: 210 50% 10%;
+
+    --background: 210 50% 8%;
+    --foreground: 210 20% 95%;
+
+    --card: 210 50% 12%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 210 50% 12%;
+    --popover-foreground: 210 20% 95%;
+
+    --accent: 174 40% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 18%;
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 210 40% 15%;
+    --muted-foreground: 210 20% 60%;
+
+    --destructive: 0 60% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 40% 20%;
+    --input: 210 40% 20%;
+    --ring: 210 40% 70%;
+
+    --sidebar-background: 210 50% 6%;
+    --sidebar-foreground: 210 20% 95%;
+    --sidebar-primary: 174 40% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 50% 15%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 210 40% 15%;
+    --sidebar-ring: 174 40% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer utilities {
+  .shadow-card {
+    box-shadow: 0 1px 3px 0 hsl(210 20% 50% / 0.08), 
+                0 1px 2px -1px hsl(210 20% 50% / 0.08);
+  }
+  
+  .shadow-card-hover {
+    box-shadow: 0 4px 6px -1px hsl(210 20% 50% / 0.1), 
+                0 2px 4px -2px hsl(210 20% 50% / 0.1);
+  }
+}

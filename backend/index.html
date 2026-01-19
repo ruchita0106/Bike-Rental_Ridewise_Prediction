@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RideWise - Simple Predictor</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f7f8fb;color:#111;margin:0;padding:20px}
+    .container{max-width:640px;margin:24px auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 6px 18px rgba(20,30,60,0.08)}
+    label{display:block;margin:10px 0 6px;font-weight:600}
+    input,select{width:100%;padding:8px;border:1px solid #dfe6ef;border-radius:6px}
+    .row{display:flex;gap:12px}
+    .row > *{flex:1}
+    button{margin-top:14px;padding:10px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer}
+    #result{margin-top:12px;padding:12px;background:#f1f5f9;border-radius:6px}
+    .muted{color:#6b7280;font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>RideWise — Demand Predictor</h2>
+    <p class="muted">Enter feature values and hit <strong>Predict</strong>.</p>
+
+    <label>Prediction Type</label>
+    <select id="isHourly">
+      <option value="true">Hourly</option>
+      <option value="false">Daily</option>
+    </select>
+
+    <label>Season</label>
+    <select id="season">
+      <option>spring</option>
+      <option>summer</option>
+      <option>fall</option>
+      <option>winter</option>
+    </select>
+
+    <label>Weather</label>
+    <select id="weather">
+      <option>clear</option>
+      <option>cloudy</option>
+      <option>light_rain</option>
+      <option>heavy_rain</option>
+    </select>
+
+    <div class="row">
+      <div>
+        <label>Temperature (°C)</label>
+        <input id="temperature" type="number" value="20" step="0.1" />
+      </div>
+      <div>
+        <label>Humidity (%)</label>
+        <input id="humidity" type="number" value="50" step="1" />
+      </div>
+    </div>
+
+    <label>Working Day</label>
+    <select id="workingDay">
+      <option value="yes">yes</option>
+      <option value="no">no</option>
+    </select>
+
+    <div id="hourFields">
+      <label>Hour (0-23)</label>
+      <input id="hour" type="number" min="0" max="23" value="8" />
+    </div>
+
+    <div id="dailyFields" style="display:none">
+      <div class="row">
+        <div>
+          <label>Month (1-12)</label>
+          <input id="month" type="number" min="1" max="12" value="6" />
+        </div>
+        <div>
+          <label>Weekday (0=Mon..6=Sun)</label>
+          <input id="weekday" type="number" min="0" max="6" value="2" />
+        </div>
+      </div>
+    </div>
+
+    <button id="submit">Predict</button>
+
+    <div id="result" aria-live="polite"></div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:8000/predict';
+
+    const isHourlyEl = document.getElementById('isHourly');
+    const hourFields = document.getElementById('hourFields');
+    const dailyFields = document.getElementById('dailyFields');
+    const resultEl = document.getElementById('result');
+
+    function toggleFields(){
+      const isHourly = isHourlyEl.value === 'true';
+      hourFields.style.display = isHourly ? 'block' : 'none';
+      dailyFields.style.display = isHourly ? 'none' : 'block';
+    }
+
+    isHourlyEl.addEventListener('change', toggleFields);
+    toggleFields();
+
+    document.getElementById('submit').addEventListener('click', async ()=>{
+      resultEl.textContent = 'Predicting...';
+
+      const payload = {
+        isHourly: isHourlyEl.value === 'true',
+        inputs: {
+          season: document.getElementById('season').value,
+          weather: document.getElementById('weather').value,
+          temperature: document.getElementById('temperature').value,
+          humidity: document.getElementById('humidity').value,
+          workingDay: document.getElementById('workingDay').value
+        }
+      };
+
+      if(payload.isHourly){
+        payload.inputs.hour = document.getElementById('hour').value;
+      } else {
+        payload.inputs.month = document.getElementById('month').value;
+        payload.inputs.weekday = document.getElementById('weekday').value;
+      }
+
+      try{
+        const resp = await fetch(API_URL, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+
+        const data = await resp.json();
+        if(!resp.ok){
+          resultEl.innerHTML = `<strong>Error:</strong> ${data.error || JSON.stringify(data)}`;
+          return;
+        }
+
+        if(data && data.prediction !== undefined){
+          resultEl.innerHTML = `<strong>Prediction:</strong> ${data.prediction} (success: ${data.success})`;
+        } else {
+          resultEl.innerHTML = `<strong>Unexpected response</strong>: ${JSON.stringify(data)}`;
+        }
+
+      }catch(err){
+        resultEl.innerHTML = `<strong>Request failed:</strong> ${err.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
