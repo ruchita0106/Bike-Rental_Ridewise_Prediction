@@ -1,4 +1,4 @@
-# RideWise Insights - Bike-Sharing Demand Prediction
+# Bike-Rental_Ridewise_Prediction
 
 A full-stack application for predicting bike-sharing demand using machine learning models. The application consists of a React frontend and a Python Flask backend that serves ML models for hourly and daily demand predictions.
 
@@ -246,3 +246,17 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Firebase Authentication
+
+This project uses Firebase Authentication for user management:
+
+- **Signup**: Create new accounts with email and password
+- **Login**: Authenticate existing users
+- **Protected Routes**: Dashboard and other pages require authentication
+
+### Firebase Setup
+
+1. The Firebase configuration is in `src/firebase.ts`
+2. Make sure Firebase Authentication is enabled in your Firebase Console
+3. Enable Email/Password authentication method in Firebase Console
