@@ -50,8 +50,9 @@ load_dotenv(os.path.join(PROJECT_ROOT, '.env'))
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Configure GEMINI API key
-# Prefer the environment variable (backend/.env or OS env); fall back to the provided key.
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY') or 'AIzaSyAzMOWptJJm5aUV5LNvSz8hZx6F-L8E50M'
+# Security: do not hardcode API keys in source control.
+# Set GEMINI_API_KEY via backend/.env or OS environment variables.
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 if genai is None:
     logger.warning("google-genai SDK is not installed. Install it with 'pip install google-genai'.")
 else:
@@ -76,7 +77,15 @@ else:
         logger.warning("GEMINI_API_KEY not found in environment. Set it in backend/.env or system environment variables.")
 
 # System prompt used for all chatbot requests
-SYSTEM_PROMPT = """You are RideWise Assistant, a friendly and helpful AI assistant for the RideWise bike-sharing demand prediction application.
+SYSTEM_PROMPT = """You are RideWise Assistant, a friendly and helpful voice-enabled AI chatbot for the RideWise bike-sharing demand prediction application.
+
+VOICE-ENABLED CHATBOT (STRICT RULES):
+- All your responses are automatically read aloud using Text-to-Speech
+- Responses are spoken point-by-point with natural pauses between points
+- Format answers to sound natural and clear when spoken
+- Even short answers (yes/no, one line) are read aloud
+- The spoken audio matches your text exactly
+- Maintain clear, natural, and calm voice in your responses
 
 ABOUT RIDEWISE:
 - RideWise is a bike-sharing demand prediction system that uses ML models to forecast bike rental demand
@@ -86,100 +95,122 @@ ABOUT RIDEWISE:
 - The application includes authentication, real-time dashboard, prediction forms, file upload, and an AI chatbot assistant
 
 YOUR BEHAVIOR:
-- Keep responses CONVERSATIONAL and NATURAL (1-3 sentences for greetings, 2-5 sentences for explanations)
-- For greetings like "hello", "hi", "hey" - respond warmly and briefly, then ask how you can help
 - Be helpful, friendly, and enthusiastic
 - You have COMPLETE KNOWLEDGE of all pages, features, processes, and current application state
 - You can answer questions about ANY page, feature, or process in the application
 - When asked about features, pages, or how things work, provide detailed information from the context
 - If asked about predictions or dashboard, provide accurate information based on the context provided
 - When asked about prediction history, use the prediction history data provided in the context
-- You can answer questions like "how does the dashboard work?", "what is the prediction page?", "how do I upload a file?", "what pages are available?"
 - Reference specific predictions by ID, date, or details when available in the history
-- Explain step-by-step processes for using features (e.g., "how do I make a prediction?")
-- Use simple, clear language - avoid overly technical jargon unless asked
+- Use simple, professional language suitable for students and developers
 
-GRAMMAR AND SENTENCE STRUCTURE:
-- ALWAYS use proper grammatical sentences with correct subject-verb agreement
-- Write complete sentences with proper capitalization and punctuation
-- Each sentence must be grammatically correct and well-structured
-- Use appropriate tenses (present, past, future) correctly
-- Avoid sentence fragments - every point should be a complete, grammatical sentence
-- Use proper punctuation: periods, commas, question marks, exclamation marks as needed
-- Start each sentence with a capital letter
+RESPONSE FORMATTING RULES (STRICT - MUST FOLLOW):
+- ALWAYS answer in clear, numbered or bulleted points - NO EXCEPTIONS
+- Use headings where applicable (e.g., "## Dashboard Features", "## Steps to Make a Prediction")
+- Keep each point short, precise, and meaningful (1-2 lines max per point)
+- DO NOT write long paragraphs - break everything into points
+- Use sub-points for explanations instead of paragraphs
+- Maintain logical order: definition → explanation → example (if needed)
+- Use simple, professional language suitable for students and developers
 
-RESPONSE FORMATTING:
-- Use emojis SPARINGLY and APPROPRIATELY (1-2 emojis per response, max 3 for longer responses)
-  * Use 🚴 for bike-related topics
-  * Use 📊 for dashboard/analytics
-  * Use 🌦️ for weather
-  * Use ✅ or 👍 for confirmations
-  * Use 💡 for tips/insights
-  * Use 😊 or 👋 for greetings
-- Use proper punctuation: periods, commas, exclamation marks when appropriate
-- Break into paragraphs when explaining multiple points (use line breaks)
+FORMATTING STRUCTURE:
+- For greetings: Use 1-2 brief points, then ask how you can help
+- For explanations: Always use numbered (1., 2., 3.) or bulleted (•) lists
+- For step-by-step guides: Use numbered lists (1., 2., 3.)
+- For feature lists: Use bulleted lists (•)
+- For definitions: Start with a heading, then use points
+- For comparisons: Use bulleted lists with sub-points if needed
 
-POINT-WISE ANSWERS:
-- ALWAYS use bullet points (• or -) or numbered lists when:
-  * Listing multiple features, options, or steps
-  * Explaining how to do something with multiple steps
-  * Describing benefits, factors, or characteristics
-  * Answering "what are" or "how to" questions
-  * Providing tips, suggestions, or recommendations
-  * Comparing different options or modes
-  * Answering questions about prediction history or multiple predictions
-- Format point-wise answers clearly with proper spacing between points
-- Use emojis at the start of point-wise lists or key points when appropriate
-- CRITICAL: Each point MUST be a complete, grammatical sentence with proper punctuation
-- Keep each point concise (1-2 sentences max per point) but ensure they are complete sentences
-- Use numbered lists (1., 2., 3.) for sequential steps - each step must be a full sentence
-- Use bullet points (• or -) for non-sequential lists - each bullet must be a full sentence
-- Start each point with a capital letter and end with proper punctuation (period, exclamation, etc.)
-- Example format:
-  • First point is a complete sentence with proper grammar and punctuation.
-  • Second point is also a full sentence that explains another aspect clearly.
-  • Each point should stand alone as a grammatical sentence while contributing to the overall answer.
+POINT FORMATTING:
+- Each point MUST be a complete, grammatical sentence
+- Start each point with a capital letter
+- End each point with proper punctuation (period, exclamation, etc.)
+- Keep points concise: 1-2 lines maximum
+- Use sub-points (indented with - or •) for detailed explanations within a main point
+- Numbered lists for sequential steps: 1., 2., 3.
+- Bulleted lists for non-sequential items: • or -
 
-RESPONSE STYLE EXAMPLES:
-- Greetings: "Hi! 👋 How can I help you with RideWise today?"
-- Features (point-wise with proper sentences): 
-  "RideWise has several key features: 
-  • 📊 Dashboard allows you to view real-time analytics and insights about bike demand patterns.
-  • 🎯 Prediction feature enables you to forecast demand for both hourly and daily time periods.
-  • 📁 Upload lets you make predictions from uploaded CSV or TXT files.
-  • 💬 Chatbot provides instant help and answers to your questions anytime!"
+HEADINGS:
+- Use headings (## Heading) to organize sections when needed
+- Examples: "## Dashboard Components", "## How to Make a Prediction", "## Available Pages"
 
-- How-to (numbered with proper sentences):
-  "To make a prediction, follow these steps:
-  1. Navigate to the Prediction page from the main menu.
-  2. Choose between hourly or daily prediction mode using the toggle.
-  3. Enter weather conditions, temperature, humidity, and time details in the form.
-  4. Click the 'Predict Demand' button to generate your forecast."
+EMOJIS (OPTIONAL, USE SPARINGLY):
+- Use emojis only at the start of a response or key sections (max 1-2 per response)
+- 🚴 for bike-related topics
+- 📊 for dashboard/analytics
+- 🌦️ for weather
+- ✅ for confirmations
+- 💡 for tips
 
-- Prediction history (point-wise with proper sentences):
-  "Based on your prediction history:
-  • Your last prediction was made on [date] for a [type] forecast, showing [demand] bikes.
-  • You have made a total of [X] predictions, with [Y] hourly and [Z] daily predictions.
-  • The average predicted demand across all your predictions is [value] bikes."
+RESPONSE EXAMPLES:
 
-- Page/Feature questions (point-wise with proper sentences):
-  "The Dashboard page includes several components:
-  • Summary Cards display your latest prediction results including demand, weather impact, and peak status.
-  • Demand Line Chart visualizes bike demand trends over time with interactive data points.
-  • Weather Bar Chart shows the distribution of bike demand across different weather conditions.
-  • Insights Panel provides analytical insights about bike-sharing usage patterns and trends.
-  • The dashboard automatically refreshes every 10 seconds to show the latest data."
+Example 1 - Greeting:
+"Hi! 👋 I'm RideWise Assistant.
 
-- How-to questions (point-wise with proper sentences):
-  "To make a prediction from a file:
-  1. Navigate to the Upload page from the main navigation menu.
-  2. Click the file input and select a .txt file with key-value pairs (e.g., temp:25, hum:60).
-  3. Choose the prediction mode: Auto-detect, Hourly, or Daily.
-  4. Click the Upload and Predict button to process your file.
-  5. The result will automatically redirect you to the Prediction page with the forecast displayed."
+• I can help you understand bike-sharing demand predictions
+• I know about all pages, features, and your prediction history
+• Ask me anything about RideWise!
 
-- IMPORTANT: Always ensure each point is a complete, grammatical sentence with proper punctuation.
-- IMPORTANT: Use the comprehensive application context provided to answer ANY question about pages, features, or processes."""
+How can I help you today?"
+
+Example 2 - Feature Explanation:
+"## Dashboard Features
+
+The Dashboard page includes:
+
+• Summary Cards
+  - Show predicted demand, weather impact, and peak status
+  - Update automatically with your latest predictions
+
+• Demand Line Chart
+  - Visualizes bike demand trends over time
+  - Interactive data points for detailed analysis
+
+• Weather Bar Chart
+  - Shows demand distribution by weather conditions
+  - Helps identify weather impact patterns
+
+• Insights Panel
+  - Provides analytical insights about usage patterns
+  - Updates every 10 seconds automatically"
+
+Example 3 - Step-by-Step Guide:
+"## How to Make a Prediction
+
+Follow these steps:
+
+1. Navigate to the Prediction page from the main menu
+2. Choose between hourly or daily prediction mode using the toggle
+3. Enter required fields:
+   - Date (dteday)
+   - Season (spring/summer/fall/winter)
+   - Hour (0-23 for hourly mode)
+   - Weather condition
+   - Temperature and humidity
+   - Working day status
+4. Click the 'Predict Demand' button
+5. View the predicted bike demand displayed below the form"
+
+Example 4 - Definition with Points:
+"## Prediction Page
+
+The Prediction page allows you to make bike demand forecasts.
+
+• Purpose: Forecast bike rental demand using ML models
+• Modes: Supports both hourly and daily predictions
+• Inputs: Weather, temperature, humidity, and temporal factors
+• Output: Predicted number of bikes needed
+
+You can switch between hourly and daily modes using the toggle."
+
+CRITICAL RULES:
+- NEVER write paragraphs longer than 2 lines
+- ALWAYS break content into numbered or bulleted points
+- Use headings to organize when explaining multiple topics
+- Keep each point to 1-2 lines maximum
+- Use sub-points for detailed explanations within main points
+- Maintain logical flow: definition → explanation → example
+- Use simple, professional language suitable for students and developers"""
 
 # In-memory chat history
 chat_history = []
@@ -189,74 +220,126 @@ def _get_fallback_response(user_msg_lower, context_info):
     """Generate fallback response when API quota is exceeded."""
     # Common greetings
     if any(greeting in user_msg_lower for greeting in ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening']):
-        return "Hi! 👋 I'm RideWise Assistant. Unfortunately, I'm experiencing high demand right now, but I can still help you with basic information about RideWise!"
+        return """Hi! 👋 I'm RideWise Assistant.
+
+• I'm experiencing high demand right now
+• I can still help you with basic information about RideWise
+• Try again in a few minutes for full functionality
+
+How can I help you?"""
     
     # Questions about pages
     if 'dashboard' in user_msg_lower:
-        return """The Dashboard page 📊 shows real-time bike-sharing demand analytics and insights.
+        return """## Dashboard Page
 
-• Summary Cards display your latest prediction results including predicted demand, weather impact, and peak status.
-• Demand Line Chart visualizes bike demand trends over time with interactive data points.
-• Weather Bar Chart shows the distribution of bike demand across different weather conditions.
-• Insights Panel provides analytical insights about bike-sharing usage patterns and trends.
-• The dashboard automatically refreshes every 10 seconds to show the latest data.
+The Dashboard shows real-time bike-sharing demand analytics.
 
-You can access it from the navigation menu or by going to /dashboard."""
+• Summary Cards
+  - Display predicted demand, weather impact, and peak status
+  - Update with your latest prediction results
+
+• Demand Line Chart
+  - Visualizes bike demand trends over time
+  - Interactive data points for analysis
+
+• Weather Bar Chart
+  - Shows demand distribution by weather conditions
+  - Helps identify weather impact patterns
+
+• Insights Panel
+  - Provides analytical insights about usage patterns
+  - Updates every 10 seconds automatically
+
+Access: Navigation menu or /dashboard"""
     
     if 'prediction' in user_msg_lower and 'page' in user_msg_lower or 'how' in user_msg_lower and 'predict' in user_msg_lower:
-        return """The Prediction page 🎯 allows you to make bike demand forecasts.
+        return """## How to Make a Prediction
 
-To make a prediction:
-1. Navigate to the Prediction page from the main menu.
-2. Choose between hourly or daily prediction mode using the toggle switch.
-3. Fill in the required fields: date, season, hour (for hourly mode), weather, temperature, humidity, and working day status.
-4. Click the 'Predict Demand' button to generate your forecast.
-5. The predicted bike demand will be displayed below the form.
+Follow these steps:
 
-The page supports both hourly and daily prediction modes with different input requirements."""
+1. Navigate to the Prediction page from the main menu
+2. Choose hourly or daily prediction mode using the toggle
+3. Fill in required fields:
+   - Date (dteday)
+   - Season (spring/summer/fall/winter)
+   - Hour (0-23 for hourly mode)
+   - Weather condition
+   - Temperature and humidity
+   - Working day status
+4. Click the 'Predict Demand' button
+5. View the predicted bike demand below the form
+
+The page supports both hourly and daily prediction modes."""
     
     if 'upload' in user_msg_lower or 'file' in user_msg_lower:
-        return """The Upload page 📁 enables file-based predictions.
+        return """## Upload Page
 
-To upload and predict:
-1. Go to the Upload page from the navigation menu.
-2. Click the file input and select a .txt file.
-3. Your file should contain key-value pairs like 'temp:25', 'hum:60', 'weather:1'.
-4. Choose the prediction mode: Auto-detect, Hourly, or Daily.
-5. Click 'Upload and Predict' to process your file.
-6. The result will redirect you to the Prediction page with the forecast displayed.
+Enables file-based predictions.
 
-Accepted file format: .txt files with key:value pairs."""
+## Steps to Upload and Predict:
+
+1. Go to the Upload page from the navigation menu
+2. Click the file input and select a .txt file
+3. File format: key-value pairs like 'temp:25', 'hum:60', 'weather:1'
+4. Choose prediction mode: Auto-detect, Hourly, or Daily
+5. Click 'Upload and Predict' to process
+6. Result redirects to Prediction page with forecast
+
+Accepted format: .txt files with key:value pairs"""
     
     if 'chatbot' in user_msg_lower or 'chat' in user_msg_lower:
-        return """The Chatbot page 💬 provides AI assistance for RideWise.
+        return """## Chatbot Page
 
-• You can ask questions about any page, feature, or process in the application.
-• The chatbot has access to your prediction history and current application state.
-• Simply type your question in the input field and click send or press Enter.
-• The chatbot can help with navigation, feature explanations, and prediction information.
+Provides AI assistance for RideWise.
 
-You're currently using the Chatbot page right now!"""
+• Ask questions about any page, feature, or process
+• Has access to your prediction history and current state
+• Type your question and click send or press Enter
+• Helps with navigation, feature explanations, and predictions
+
+You're currently using the Chatbot page!"""
     
     if 'profile' in user_msg_lower:
-        return """The Profile page 👤 displays your user information and project details.
+        return """## Profile Page
 
-• User Information section shows your name, email, and avatar.
-• Project Details section provides information about the RideWise project.
-• Reviews section displays user reviews and feedback.
+Displays user information and project details.
 
-You can access it from the navigation menu or by going to /profile."""
+• User Information
+  - Shows your name, email, and avatar
+
+• Project Details
+  - Provides information about the RideWise project
+
+• Reviews Section
+  - Displays user reviews and feedback
+
+Access: Navigation menu or /profile"""
     
     if 'feature' in user_msg_lower or 'what can' in user_msg_lower:
-        return """RideWise has several key features:
+        return """## RideWise Features
 
-• 📊 Dashboard: Real-time analytics and insights visualization with charts and summary cards.
-• 🎯 Prediction: Make hourly or daily bike demand forecasts using weather and temporal data.
-• 📁 Upload: Predict bike demand from uploaded CSV or TXT files.
-• 💬 Chatbot: Get instant help and answers about the application (you're using it now!).
-• 👤 Profile: View your user information and project details.
+Key features available:
 
-All features are accessible from the main navigation menu."""
+• 📊 Dashboard
+  - Real-time analytics and insights visualization
+  - Charts and summary cards
+
+• 🎯 Prediction
+  - Make hourly or daily bike demand forecasts
+  - Uses weather and temporal data
+
+• 📁 Upload
+  - Predict from uploaded CSV or TXT files
+  - Supports batch predictions
+
+• 💬 Chatbot
+  - Get instant help and answers
+  - You're using it now!
+
+• 👤 Profile
+  - View user information and project details
+
+All features accessible from the main navigation menu"""
     
     if 'history' in user_msg_lower or 'past prediction' in user_msg_lower:
         # Try to get actual history from context
@@ -265,19 +348,31 @@ All features are accessible from the main navigation menu."""
             lines = context_info.split('\n')
             history_lines = [l for l in lines if 'prediction history' in l.lower() or 'total of' in l.lower() or 'ID' in l]
             if history_lines:
-                return f"Based on your prediction history:\n\n" + "\n".join(history_lines[:5])
-        return "Your prediction history stores all predictions you've made. You can view it by asking about specific predictions or checking the dashboard for recent results."
+                return "## Your Prediction History\n\n" + "\n".join(["• " + l.strip() for l in history_lines[:5] if l.strip()])
+        return """## Prediction History
+
+Your prediction history stores all predictions you've made.
+
+• View by asking about specific predictions
+• Check the dashboard for recent results
+• All predictions are tracked automatically"""
     
     # Default fallback
-    return """I'm currently experiencing high API demand, but I can still help!
+    return """## RideWise Information
 
-Here's what I can tell you about RideWise:
-• The app has Dashboard, Prediction, Upload, Chatbot, and Profile pages.
-• You can make predictions using weather and time data.
-• The Dashboard shows analytics and insights.
-• File uploads are supported for batch predictions.
+I'm experiencing high API demand, but here's what I can tell you:
 
-For more detailed answers, please try again in a few minutes when the API quota resets, or check the application pages directly."""
+• Pages available:
+  - Dashboard, Prediction, Upload, Chatbot, and Profile
+
+• Key capabilities:
+  - Make predictions using weather and time data
+  - View analytics and insights on Dashboard
+  - Upload files for batch predictions
+
+• Next steps:
+  - Try again in a few minutes when API quota resets
+  - Check application pages directly for features"""
 
 
 def _get_application_context():
@@ -512,6 +607,7 @@ def chat():
             }), 503
 
         user_msg = request.json.get("message")
+        prediction_data = request.json.get("prediction_data")  # Get prediction data from frontend
 
         if not user_msg or not user_msg.strip():
             return jsonify({"error": "Message required"}), 400
@@ -521,6 +617,21 @@ def chat():
 
         # Get current application context for dynamic responses
         context_info = _get_application_context()
+        
+        # Add prediction data to context if available from frontend
+        if prediction_data:
+            pred_type = prediction_data.get('predictionType', 'Unknown')
+            pred_value = prediction_data.get('prediction', 'N/A')
+            pred_inputs = prediction_data.get('inputs', {})
+            timestamp = prediction_data.get('timestamp', '')
+            
+            context_info += f"\n=== CURRENT PREDICTION DATA (FROM FRONTEND) ==="
+            context_info += f"\n• Latest Prediction: {pred_type} mode, predicted demand: {pred_value} bikes."
+            if pred_inputs:
+                context_info += f"\n• Prediction Inputs: Date={pred_inputs.get('dteday', 'N/A')}, Season={pred_inputs.get('season', 'N/A')}, Weather={pred_inputs.get('weathersit', 'N/A')}, Temp={pred_inputs.get('temp', 'N/A')}, Humidity={pred_inputs.get('hum', 'N/A')}."
+            if timestamp:
+                context_info += f"\n• Prediction Timestamp: {timestamp}."
+            context_info += "\n"
         
         # Build chat history for Gemini API
         # Gemini expects a list of message dicts with 'role' and 'parts'

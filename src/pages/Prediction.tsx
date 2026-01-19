@@ -72,6 +72,8 @@ export default function Prediction() {
     setInputs((prev) => ({ ...prev, [key]: value }));
     setPrediction(null);
     setError(null);
+    // Clear stored prediction data when user changes inputs
+    localStorage.removeItem('ridewise_prediction_data');
   };
 
   const validateInputs = (): boolean => {
@@ -137,6 +139,18 @@ export default function Prediction() {
       if (result.prediction !== undefined && result.prediction !== null) {
         setPrediction(result.prediction);
         console.log(`[Predict] Success: ${result.prediction}`);
+        
+        // Store prediction data in localStorage for persistence
+        const predictionData = {
+          prediction: result.prediction,
+          predictionType: isHourly ? 'Hourly' : 'Daily',
+          inputs: payload,
+          timestamp: new Date().toISOString(),
+          dateReadable: new Date().toLocaleString(),
+        };
+        localStorage.setItem('ridewise_prediction_data', JSON.stringify(predictionData));
+        console.log('Prediction data saved to localStorage');
+        
         toast({
           title: "Prediction Generated",
           description: `Predicted ${isHourly ? 'hourly' : 'daily'} demand: ${Math.round(result.prediction)} bikes`,
@@ -197,6 +211,8 @@ export default function Prediction() {
                   setIsHourly(!checked);
                   setPrediction(null);
                   setError(null);
+                  // Clear stored prediction data when mode changes
+                  localStorage.removeItem('ridewise_prediction_data');
                 }}
               />
               <span className={`text-sm font-medium ${isHourly ? "text-muted-foreground" : "text-foreground"}`}>

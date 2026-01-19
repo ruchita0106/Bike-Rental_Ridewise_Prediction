@@ -73,6 +73,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signOut(auth);
       setUser(null);
+      // Clear chat history on logout
+      localStorage.removeItem('ridewise_chat_history');
+      console.log('Chat history cleared on logout');
     } catch (error) {
       console.error("Logout failed:", error);
     }
